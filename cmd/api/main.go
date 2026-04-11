@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/EduardoMark/BillingCore/internal/account"
 	"github.com/EduardoMark/BillingCore/internal/infra/database"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -20,7 +21,7 @@ func main() {
 	}
 
 	// Initialize database connection
-	_, err := database.New()
+	db, err := database.New()
 	if err != nil {
 		logger.Fatal("Error connecting to database", zap.Error(err))
 	}
@@ -37,6 +38,14 @@ func main() {
 			"status": "ok",
 		})
 	})
+
+	api := router.Group("/api/v1")
+
+	// Register account routes
+	accRepository := account.NewRepository(db)
+	accService := account.NewService(accRepository)
+	accHandler := account.NewHandler(accService)
+	accHandler.RegisterRoutes(api)
 
 	router.Run(":8080")
 }
