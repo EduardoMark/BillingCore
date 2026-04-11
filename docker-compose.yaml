@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "8080:8080"
+    depends_on:
+      - postgres
+    volumes:
+      - ./:/app
+
+  postgres:
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: billingCore
+    ports:
+      - "5423:5432"
+    volumes: 
+      - postgres_data:/var/lib/postgresql/18/docker
+
+volumes:
+  postgres_data:
+    driver: local
