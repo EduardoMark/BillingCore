@@ -48,3 +48,22 @@ func (h *Handler) Create(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, account)
 }
+
+func (h *Handler) GetOne(ctx *gin.Context) {
+	zap.L().Info("Handler.GetOne running")
+	id := ctx.Param("id")
+
+	account, err := h.service.GetByID(id)
+	if err != nil {
+		if errors.Is(err, ErrAccountNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Account not found"})
+			return
+		}
+
+		zap.L().Error("Failed to get account", zap.Error(err))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get account"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, account)
+}
