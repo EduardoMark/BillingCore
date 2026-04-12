@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/EduardoMark/BillingCore/internal/account"
+	"github.com/EduardoMark/BillingCore/internal/billing/plans"
 	"github.com/EduardoMark/BillingCore/internal/infra/database"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -47,5 +48,12 @@ func main() {
 	accHandler := account.NewHandler(accService)
 	accHandler.RegisterRoutes(api)
 
+	// Register plan routes
+	planRepository := plans.NewRepository(db)
+	planService := plans.NewService(planRepository)
+	planHandler := plans.NewHandler(planService)
+	planHandler.RegisterRoutes(api)
+
+	// Start the server
 	router.Run(":8080")
 }

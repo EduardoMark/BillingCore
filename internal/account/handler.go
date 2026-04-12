@@ -18,52 +18,52 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
-func (h *Handler) Create(ctx *gin.Context) {
+func (h *Handler) Create(c *gin.Context) {
 	zap.L().Info("Handler.Create running")
 	var payload CreateAccountPayload
 
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		zap.L().Error("Failed to bind JSON", zap.Error(err))
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
 	if err := payload.Validate(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	account, err := h.service.Create(&payload)
+	account, err := h.service.Create(c, &payload)
 	if err != nil {
 		zap.L().Error("Failed to create account", zap.Error(err))
 
 		if errors.Is(err, ErrEmailAlreadyExists) {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+			c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
 			return
 		}
 
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create account"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create account"})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, account)
+	c.JSON(http.StatusCreated, account)
 }
 
-func (h *Handler) GetOne(ctx *gin.Context) {
+func (h *Handler) GetOne(c *gin.Context) {
 	zap.L().Info("Handler.GetOne running")
-	id := ctx.Param("id")
+	id := c.Param("id")
 
-	account, err := h.service.GetByID(id)
+	account, err := h.service.GetByID(c, id)
 	if err != nil {
 		if errors.Is(err, ErrAccountNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "Account not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Account not found"})
 			return
 		}
 
 		zap.L().Error("Failed to get account", zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get account"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get account"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, account)
+	c.JSON(http.StatusOK, account)
 }

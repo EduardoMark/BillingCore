@@ -25,6 +25,12 @@ func FormatValidationError(fe validator.FieldError) string {
 		return fmt.Sprintf("%s must be at least %s characters", field, fe.Param())
 	case "max":
 		return fmt.Sprintf("%s must be at most %s characters", field, fe.Param())
+	case "gte":
+		return fmt.Sprintf("%s must be greater than or equal to %s", field, fe.Param())
+	case "lte":
+		return fmt.Sprintf("%s must be less than or equal to %s", field, fe.Param())
+	case "oneof":
+		return fmt.Sprintf("%s must be one of the following: %s", field, fe.Param())
 	default:
 		return fmt.Sprintf("%s is invalid", field)
 	}

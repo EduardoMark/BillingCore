@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/EduardoMark/BillingCore/internal/account"
+	"github.com/EduardoMark/BillingCore/internal/billing/plans"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -33,5 +34,6 @@ func New() (*gorm.DB, error) {
 func Migrate() error {
 	return DB.AutoMigrate(
 		&account.Account{},
+		&plans.Plan{},
 	)
 }

@@ -1,6 +1,7 @@
 package account
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -23,8 +24,8 @@ var (
 	ErrAccountNotFound    = errors.New("account not found")
 )
 
-func (r *Repository) Create(account *Account) error {
-	err := r.db.Create(&account).Error
+func (r *Repository) Create(ctx context.Context, account *Account) error {
+	err := r.db.WithContext(ctx).Create(&account).Error
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -40,9 +41,9 @@ func (r *Repository) Create(account *Account) error {
 	return nil
 }
 
-func (r *Repository) GetByID(id string) (*Account, error) {
+func (r *Repository) GetByID(ctx context.Context, id string) (*Account, error) {
 	var account Account
-	err := r.db.Where("id = ?", id).First(&account).Error
+	err := r.db.WithContext(ctx).Where("id = ?", id).First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrAccountNotFound
@@ -55,9 +56,9 @@ func (r *Repository) GetByID(id string) (*Account, error) {
 	return &account, nil
 }
 
-func (r *Repository) GetByEmail(email string) (*Account, error) {
+func (r *Repository) GetByEmail(ctx context.Context, email string) (*Account, error) {
 	var account Account
-	err := r.db.Where("email = ?", email).First(&account).Error
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrAccountNotFound

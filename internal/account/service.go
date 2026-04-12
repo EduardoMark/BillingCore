@@ -1,6 +1,7 @@
 package account
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/EduardoMark/BillingCore/pkg/hashing"
@@ -14,7 +15,7 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Create(payload *CreateAccountPayload) (*Account, error) {
+func (s *Service) Create(ctx context.Context, payload *CreateAccountPayload) (*Account, error) {
 	passwordHash, err := hashing.HashPassword(payload.Password)
 	if err != nil {
 		return nil, fmt.Errorf("Service.Create error: %w", err)
@@ -26,7 +27,7 @@ func (s *Service) Create(payload *CreateAccountPayload) (*Account, error) {
 		PasswordHash: passwordHash,
 	}
 
-	err = s.repo.Create(acc)
+	err = s.repo.Create(ctx, acc)
 	if err != nil {
 		return nil, fmt.Errorf("Service.Create error: %w", err)
 	}
@@ -34,8 +35,8 @@ func (s *Service) Create(payload *CreateAccountPayload) (*Account, error) {
 	return acc, nil
 }
 
-func (s *Service) GetByID(id string) (*Account, error) {
-	acc, err := s.repo.GetByID(id)
+func (s *Service) GetByID(ctx context.Context, id string) (*Account, error) {
+	acc, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("Service.GetByID error: %w", err)
 	}
@@ -43,8 +44,8 @@ func (s *Service) GetByID(id string) (*Account, error) {
 	return acc, nil
 }
 
-func (s *Service) GetByEmail(email string) (*Account, error) {
-	acc, err := s.repo.GetByEmail(email)
+func (s *Service) GetByEmail(ctx context.Context, email string) (*Account, error) {
+	acc, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, fmt.Errorf("Service.GetByEmail error: %w", err)
 	}
