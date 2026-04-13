@@ -1,6 +1,12 @@
 package customer
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"os"
+
+	"github.com/EduardoMark/BillingCore/internal/integration/asaas"
+)
 
 type Service struct {
 	repo *Repository
@@ -21,13 +27,31 @@ func (s *Service) Create(ctx context.Context, accountID string, payload *CreateC
 		AddressNumber:    payload.AddressNumber,
 		Province:         payload.Province,
 		PostalCode:       payload.PostalCode,
-		ExternalID:       payload.ExternalID,
 		ExternalPlatform: Platform(payload.ExternalPlatform),
 	}
 
-	err := s.repo.Create(ctx, customer)
+	asaasAPIKey := os.Getenv("ASAAS_API_KEY")
+	asaasClient := asaas.NewClient(asaasAPIKey)
+
+	asaasCustomer, err := asaasClient.CreateCustomer(ctx, &asaas.CreateCustomerRequest{
+		Name:          payload.Name,
+		CpfCnpj:       payload.CpfCnpj,
+		Email:         payload.Email,
+		Phone:         payload.Phone,
+		Address:       payload.Address,
+		AddressNumber: payload.AddressNumber,
+		Province:      payload.Province,
+		PostalCode:    payload.PostalCode,
+	})
 	if err != nil {
 		return nil, err
+	}
+
+	customer.ExternalID = asaasCustomer.ID
+
+	err = s.repo.Create(ctx, customer)
+	if err != nil {
+		return nil, fmt.Errorf("Service.Create error asaas.id=%s err= %w", asaasCustomer.ID, err)
 	}
 
 	return customer, nil
@@ -74,7 +98,6 @@ func (s *Service) Update(ctx context.Context, id string, payload UpdateCustomerP
 	customer.AddressNumber = payload.AddressNumber
 	customer.Province = payload.Province
 	customer.PostalCode = payload.PostalCode
-	customer.ExternalID = payload.ExternalID
 	customer.ExternalPlatform = Platform(payload.ExternalPlatform)
 
 	err = s.repo.Update(ctx, customer)

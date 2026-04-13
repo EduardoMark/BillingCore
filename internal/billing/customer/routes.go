@@ -3,7 +3,7 @@ package customer
 import "github.com/gin-gonic/gin"
 
 func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
-	customers := router.Group("/customers")
+	customers := router.Group("/:account_id/customers")
 	{
 		customers.POST("/", h.Create)
 		customers.GET("/", h.GetAllByAccountID)
