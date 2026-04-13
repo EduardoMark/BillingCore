@@ -13,8 +13,8 @@ type CreateAccountPayload struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
-func (p *CreateAccountPayload) Validate() []string {
-	err := validate.Validate.Struct(p)
+func Validate[T any](t T) []string {
+	err := validate.Validate.Struct(t)
 	if err == nil {
 		return nil
 	}

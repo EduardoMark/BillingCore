@@ -14,8 +14,15 @@ type CreatePlanPayload struct {
 	BillingCycle BillingCycle `json:"billing_cycle" validate:"required,oneof=monthly yearly"`
 }
 
-func (p *CreatePlanPayload) Validate() []string {
-	err := validate.Validate.Struct(p)
+type UpdatePlanPayload struct {
+	Name         string       `json:"name" validate:"min=3,max=100"`
+	Description  string       `json:"description" validate:"min=10,max=500"`
+	Price        int64        `json:"price" validate:"gte=0"`
+	BillingCycle BillingCycle `json:"billing_cycle" validate:"oneof=monthly yearly"`
+}
+
+func Validate[T any](t T) []string {
+	err := validate.Validate.Struct(t)
 	if err == nil {
 		return nil
 	}

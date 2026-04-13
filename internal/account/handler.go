@@ -28,7 +28,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := payload.Validate(); err != nil {
+	if err := Validate(payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}

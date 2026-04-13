@@ -26,7 +26,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := payload.Validate(); err != nil {
+	if err := Validate(payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": err})
 		return
 	}
@@ -64,4 +64,62 @@ func (h *Handler) GetOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, plan)
+}
+
+func (h *Handler) GetAll(c *gin.Context) {
+	zap.L().Info("Handler.GetAll running")
+	accountID := c.Param("account_id")
+
+	plans, err := h.service.GetAll(c, accountID)
+	if err != nil {
+		zap.L().Error("Handler.GetAll error", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, plans)
+}
+
+func (h *Handler) Update(c *gin.Context) {
+	zap.L().Info("Handler.Update running")
+	id := c.Param("id")
+
+	var payload UpdatePlanPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	if err := Validate(payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errors": err})
+		return
+	}
+
+	plan, err := h.service.Update(c, id, &payload)
+	if err != nil {
+		if errors.Is(err, ErrPlanNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
+			return
+		}
+
+		zap.L().Error("Handler.Update error", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, plan)
+}
+
+func (h *Handler) Delete(c *gin.Context) {
+	zap.L().Info("Handler.Delete running")
+	id := c.Param("id")
+
+	err := h.service.Delete(c, id)
+	if err != nil {
+		zap.L().Error("Handler.Delete error", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
