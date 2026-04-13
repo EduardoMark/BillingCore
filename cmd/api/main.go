@@ -4,11 +4,13 @@ import (
 	"net/http"
 
 	"github.com/EduardoMark/BillingCore/internal/account"
+	"github.com/EduardoMark/BillingCore/internal/billing/customer"
 	"github.com/EduardoMark/BillingCore/internal/billing/plans"
 	"github.com/EduardoMark/BillingCore/internal/infra/database"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -40,21 +42,31 @@ func main() {
 		})
 	})
 
+	BindingRoutes(router, db)
+
+	// Start the server
+	router.Run(":8080")
+}
+
+func BindingRoutes(router *gin.Engine, db *gorm.DB) {
 	api := router.Group("/api/v1")
 	accGroup := api.Group("/accounts")
 
-	// Register account routes
+	// account routes
 	accRepository := account.NewRepository(db)
 	accService := account.NewService(accRepository)
 	accHandler := account.NewHandler(accService)
 	accHandler.RegisterRoutes(accGroup)
 
-	// Register plan routes
+	// plan routes
 	planRepository := plans.NewRepository(db)
 	planService := plans.NewService(planRepository)
 	planHandler := plans.NewHandler(planService)
 	planHandler.RegisterRoutes(accGroup)
 
-	// Start the server
-	router.Run(":8080")
+	// customer routes
+	custRepository := customer.NewRepository(db)
+	custService := customer.NewService(custRepository)
+	custHandler := customer.NewHandler(custService)
+	custHandler.RegisterRoutes(accGroup)
 }
