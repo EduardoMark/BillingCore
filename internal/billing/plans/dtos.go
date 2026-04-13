@@ -2,7 +2,6 @@ package plans
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/EduardoMark/BillingCore/pkg/validate"
 	"github.com/go-playground/validator/v10"
@@ -26,7 +25,6 @@ func (p *CreatePlanPayload) Validate() []string {
 		errs := make([]string, 0, len(validationErrors))
 
 		for _, fieldErr := range validationErrors {
-			fmt.Println(">>>>>>>>>>>", fieldErr)
 			errs = append(errs, validate.FormatValidationError(fieldErr))
 		}
 

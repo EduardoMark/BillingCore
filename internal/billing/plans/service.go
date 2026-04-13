@@ -17,9 +17,9 @@ var (
 	ErrInvalidPrice = errors.New("price must be greater than zero")
 )
 
-func (s *Service) Create(ctx context.Context, accountID string, payload *CreatePlanPayload) error {
+func (s *Service) Create(ctx context.Context, accountID string, payload *CreatePlanPayload) (*Plan, error) {
 	if payload.Price < 0 {
-		return ErrInvalidPrice
+		return nil, ErrInvalidPrice
 	}
 
 	plan := &Plan{
@@ -32,8 +32,17 @@ func (s *Service) Create(ctx context.Context, accountID string, payload *CreateP
 
 	err := s.repo.Create(ctx, plan)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return plan, nil
+}
+
+func (s *Service) GetOne(ctx context.Context, id string) (*Plan, error) {
+	plan, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return plan, nil
 }

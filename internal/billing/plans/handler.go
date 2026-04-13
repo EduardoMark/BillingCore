@@ -31,7 +31,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	err := h.service.Create(c, accountID, &payload)
+	plan, err := h.service.Create(c, accountID, &payload)
 	if err != nil {
 		zap.L().Error("Handler.Create error", zap.Error(err))
 
@@ -44,5 +44,24 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Plan created successfully"})
+	c.JSON(http.StatusCreated, plan)
+}
+
+func (h *Handler) GetOne(c *gin.Context) {
+	zap.L().Info("Handler.GetOne running")
+	id := c.Param("id")
+
+	plan, err := h.service.GetOne(c, id)
+	if err != nil {
+		if errors.Is(err, ErrPlanNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
+			return
+		}
+
+		zap.L().Error("Handler.GetOne error", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, plan)
 }

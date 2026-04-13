@@ -41,18 +41,19 @@ func main() {
 	})
 
 	api := router.Group("/api/v1")
+	accGroup := api.Group("/accounts")
 
 	// Register account routes
 	accRepository := account.NewRepository(db)
 	accService := account.NewService(accRepository)
 	accHandler := account.NewHandler(accService)
-	accHandler.RegisterRoutes(api)
+	accHandler.RegisterRoutes(accGroup)
 
 	// Register plan routes
 	planRepository := plans.NewRepository(db)
 	planService := plans.NewService(planRepository)
 	planHandler := plans.NewHandler(planService)
-	planHandler.RegisterRoutes(api)
+	planHandler.RegisterRoutes(accGroup)
 
 	// Start the server
 	router.Run(":8080")
