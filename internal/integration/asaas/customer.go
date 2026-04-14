@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreateCustomerRequest struct {
+type CustomerRequest struct {
 	Name                 string `json:"name"`
 	CpfCnpj              string `json:"cpfCnpj"`
 	Email                string `json:"email"`
@@ -31,7 +31,7 @@ type CreateCustomerRequest struct {
 	ForeignCustomer      bool   `json:"foreignCustomer"`
 }
 
-type CreateCustomerResponse struct {
+type CustomerResponse struct {
 	Object               string `json:"object"`
 	ID                   string `json:"id"`
 	DateCreated          string `json:"dateCreated"`
@@ -58,14 +58,14 @@ type CreateCustomerResponse struct {
 	ForeignCustomer      bool   `json:"foreignCustomer"`
 }
 
-func (c *Client) CreateCustomer(ctx context.Context, payload *CreateCustomerRequest) (*CreateCustomerResponse, error) {
+func (c *Client) CreateCustomer(ctx context.Context, payload *CustomerRequest) (*CustomerResponse, error) {
 	respBody, err := c.DoRequest(ctx, http.MethodPost, "/customers", payload)
 	if err != nil {
 		zap.L().Error("Asaas.CreateCustomer error", zap.Error(err))
 		return nil, fmt.Errorf("Asaas.CreateCustomer error: %w", err)
 	}
 
-	var resp CreateCustomerResponse
+	var resp CustomerResponse
 	err = json.Unmarshal(respBody, &resp)
 	if err != nil {
 		zap.L().Error("Asaas.CreateCustomer error", zap.Error(err))
@@ -73,4 +73,31 @@ func (c *Client) CreateCustomer(ctx context.Context, payload *CreateCustomerRequ
 	}
 
 	return &resp, nil
+}
+
+func (c *Client) UpdateCustomer(ctx context.Context, id string, payload *CustomerRequest) (*CustomerResponse, error) {
+	respBody, err := c.DoRequest(ctx, http.MethodPut, "/customers/"+id, payload)
+	if err != nil {
+		zap.L().Error("Asaas.UpdateCustomer error", zap.Error(err))
+		return nil, fmt.Errorf("Asaas.UpdateCustomer error: %w", err)
+	}
+
+	var resp CustomerResponse
+	err = json.Unmarshal(respBody, &resp)
+	if err != nil {
+		zap.L().Error("Asaas.UpdateCustomer error", zap.Error(err))
+		return nil, fmt.Errorf("Asaas.UpdateCustomer error: %w", err)
+	}
+
+	return &resp, nil
+}
+
+func (c *Client) DeleteCustomer(ctx context.Context, id string) error {
+	_, err := c.DoRequest(ctx, http.MethodDelete, "/customers/"+id, nil)
+	if err != nil {
+		zap.L().Error("Asaas.DeleteCustomer error", zap.Error(err))
+		return fmt.Errorf("Asaas.DeleteCustomer error: %w", err)
+	}
+
+	return nil
 }

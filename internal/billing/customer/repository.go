@@ -31,7 +31,7 @@ func (r *Repository) Create(ctx context.Context, customer *Customer) error {
 
 func (r *Repository) GetByID(ctx context.Context, id string) (*Customer, error) {
 	var customer Customer
-	err := r.db.WithContext(ctx).First(&customer, id).Error
+	err := r.db.WithContext(ctx).First(&customer, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrCustomerNotFound
@@ -68,16 +68,16 @@ func (r *Repository) GetAllByAccountID(ctx context.Context, accountID string) ([
 }
 
 func (r *Repository) Update(ctx context.Context, customer *Customer) error {
-	err := r.db.WithContext(ctx).Updates(&customer)
+	err := r.db.WithContext(ctx).Updates(&customer).Error
 	if err != nil {
-		return fmt.Errorf("Repository.Update error: %w", err.Error)
+		return fmt.Errorf("Repository.Update error: %w", err)
 	}
 
 	return nil
 }
 
 func (r *Repository) Delete(ctx context.Context, id string) error {
-	err := r.db.WithContext(ctx).Delete(&Customer{}, id).Error
+	err := r.db.WithContext(ctx).Delete(&Customer{}, "id = ?", id).Error
 	if err != nil {
 		return fmt.Errorf("Repository.Delete error: %w", err)
 	}

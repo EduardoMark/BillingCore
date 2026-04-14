@@ -62,7 +62,7 @@ func (r *Repository) Update(ctx context.Context, plan *Plan) error {
 }
 
 func (r *Repository) Delete(ctx context.Context, id string) error {
-	err := r.db.WithContext(ctx).Delete(&Plan{}, id).Error
+	err := r.db.WithContext(ctx).Delete(&Plan{}, "id = ?", id).Error
 	if err != nil {
 		return fmt.Errorf("Repository.Delete error: %w", err)
 	}

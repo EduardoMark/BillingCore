@@ -33,7 +33,7 @@ func (s *Service) Create(ctx context.Context, accountID string, payload *CreateC
 	asaasAPIKey := os.Getenv("ASAAS_API_KEY")
 	asaasClient := asaas.NewClient(asaasAPIKey)
 
-	asaasCustomer, err := asaasClient.CreateCustomer(ctx, &asaas.CreateCustomerRequest{
+	asaasCustomer, err := asaasClient.CreateCustomer(ctx, &asaas.CustomerRequest{
 		Name:          payload.Name,
 		CpfCnpj:       payload.CpfCnpj,
 		Email:         payload.Email,
@@ -100,6 +100,25 @@ func (s *Service) Update(ctx context.Context, id string, payload UpdateCustomerP
 	customer.PostalCode = payload.PostalCode
 	customer.ExternalPlatform = Platform(payload.ExternalPlatform)
 
+	asaasAPIKey := os.Getenv("ASAAS_API_KEY")
+	asaasClient := asaas.NewClient(asaasAPIKey)
+
+	asaasPayload := asaas.CustomerRequest{
+		Name:          customer.Name,
+		CpfCnpj:       customer.CpfCnpj,
+		Email:         customer.Email,
+		Phone:         customer.Phone,
+		Address:       customer.Address,
+		AddressNumber: customer.AddressNumber,
+		Province:      customer.Province,
+		PostalCode:    customer.PostalCode,
+	}
+
+	_, err = asaasClient.UpdateCustomer(ctx, customer.ExternalID, &asaasPayload)
+	if err != nil {
+		return nil, fmt.Errorf("Service.Update error asaas.id=%s err= %w", customer.ExternalID, err)
+	}
+
 	err = s.repo.Update(ctx, customer)
 	if err != nil {
 		return nil, err
@@ -109,6 +128,21 @@ func (s *Service) Update(ctx context.Context, id string, payload UpdateCustomerP
 }
 
 func (s *Service) Delete(ctx context.Context, id string) error {
+	asaasAPIKey := os.Getenv("ASAAS_API_KEY")
+	asaasClient := asaas.NewClient(asaasAPIKey)
+
+	customer, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if customer.ExternalID != "" {
+		err = asaasClient.DeleteCustomer(ctx, customer.ExternalID)
+		if err != nil {
+			return fmt.Errorf("Service.Delete error asaas.id=%s err= %w", customer.ExternalID, err)
+		}
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return err
 	}
