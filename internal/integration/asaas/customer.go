@@ -2,7 +2,6 @@ package asaas
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -65,14 +64,13 @@ func (c *Client) CreateCustomer(ctx context.Context, payload *CustomerRequest) (
 		return nil, fmt.Errorf("Asaas.CreateCustomer error: %w", err)
 	}
 
-	var resp CustomerResponse
-	err = json.Unmarshal(respBody, &resp)
+	resp, err := DecodeResponse[CustomerResponse](respBody)
 	if err != nil {
 		zap.L().Error("Asaas.CreateCustomer error", zap.Error(err))
 		return nil, fmt.Errorf("Asaas.CreateCustomer error: %w", err)
 	}
 
-	return &resp, nil
+	return resp, nil
 }
 
 func (c *Client) UpdateCustomer(ctx context.Context, id string, payload *CustomerRequest) (*CustomerResponse, error) {
@@ -82,14 +80,13 @@ func (c *Client) UpdateCustomer(ctx context.Context, id string, payload *Custome
 		return nil, fmt.Errorf("Asaas.UpdateCustomer error: %w", err)
 	}
 
-	var resp CustomerResponse
-	err = json.Unmarshal(respBody, &resp)
+	resp, err := DecodeResponse[CustomerResponse](respBody)
 	if err != nil {
 		zap.L().Error("Asaas.UpdateCustomer error", zap.Error(err))
 		return nil, fmt.Errorf("Asaas.UpdateCustomer error: %w", err)
 	}
 
-	return &resp, nil
+	return resp, nil
 }
 
 func (c *Client) DeleteCustomer(ctx context.Context, id string) error {

@@ -63,3 +63,13 @@ func (c *Client) DoRequest(ctx context.Context, method, endpoint string, body an
 
 	return respBody, nil
 }
+
+func DecodeResponse[T any](respBody []byte) (*T, error) {
+	var result T
+	err := json.Unmarshal(respBody, &result)
+	if err != nil {
+		return nil, fmt.Errorf("Asaas.DecodeResponse error: %w", err)
+	}
+
+	return &result, nil
+}

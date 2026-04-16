@@ -7,6 +7,7 @@ import (
 	"github.com/EduardoMark/BillingCore/internal/account"
 	"github.com/EduardoMark/BillingCore/internal/billing/customer"
 	"github.com/EduardoMark/BillingCore/internal/billing/plans"
+	"github.com/EduardoMark/BillingCore/internal/billing/subscription"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -37,5 +38,6 @@ func Migrate() error {
 		&account.Account{},
 		&plans.Plan{},
 		&customer.Customer{},
+		&subscription.Subscription{},
 	)
 }
