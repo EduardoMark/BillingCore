@@ -1,12 +1,5 @@
 package customer
 
-import (
-	"errors"
-
-	"github.com/EduardoMark/BillingCore/pkg/validate"
-	"github.com/go-playground/validator/v10"
-)
-
 type CreateCustomerPayload struct {
 	Name             string `json:"name" validate:"required,min=3,max=100"`
 	Email            string `json:"email" validate:"required,email"`
@@ -29,24 +22,4 @@ type UpdateCustomerPayload struct {
 	Province         string `json:"province" validate:"required"`
 	PostalCode       string `json:"postal_code" validate:"required,len=8"`
 	ExternalPlatform string `json:"external_platform" validate:"required,oneof=asaas"`
-}
-
-func Validate[T any](t T) []string {
-	err := validate.Validate.Struct(t)
-	if err == nil {
-		return nil
-	}
-
-	var validationErrors validator.ValidationErrors
-	if errors.As(err, &validationErrors) {
-		errs := make([]string, 0, len(validationErrors))
-
-		for _, fieldErr := range validationErrors {
-			errs = append(errs, validate.FormatValidationError(fieldErr))
-		}
-
-		return errs
-	}
-
-	return nil
 }

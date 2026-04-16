@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/EduardoMark/BillingCore/pkg/validate"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -26,7 +27,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := Validate(payload); err != nil {
+	if err := validate.Validate(payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": err})
 		return
 	}
@@ -90,7 +91,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	if err := Validate(payload); err != nil {
+	if err := validate.Validate(payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": err})
 		return
 	}

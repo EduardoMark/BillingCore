@@ -1,16 +1,37 @@
 package validate
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
 
-var Validate *validator.Validate
+var validate *validator.Validate
 
 func init() {
-	Validate = validator.New(validator.WithRequiredStructEnabled())
+	validate = validator.New(validator.WithRequiredStructEnabled())
+}
+
+func Validate[T any](t T) []string {
+	err := validate.Struct(t)
+	if err == nil {
+		return nil
+	}
+
+	var validationErrors validator.ValidationErrors
+	if errors.As(err, &validationErrors) {
+		errs := make([]string, 0, len(validationErrors))
+
+		for _, fieldErr := range validationErrors {
+			errs = append(errs, FormatValidationError(fieldErr))
+		}
+
+		return errs
+	}
+
+	return nil
 }
 
 func FormatValidationError(fe validator.FieldError) string {
