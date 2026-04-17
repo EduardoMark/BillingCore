@@ -9,3 +9,8 @@ type CreateSubscriptionRequest struct {
 	NextDueDate        string  `json:"next_due_date" validate:"required"`
 	Cycle              string  `json:"cycle" validate:"required,oneof=MONTHLY YEARLY"`
 }
+
+type IdempotencyValue struct {
+	Status string `json:"status"`
+	Data   any    `json:"data,omitempty"`
+}

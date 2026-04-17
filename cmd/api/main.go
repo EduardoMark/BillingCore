@@ -8,8 +8,10 @@ import (
 	"github.com/EduardoMark/BillingCore/internal/billing/customer"
 	"github.com/EduardoMark/BillingCore/internal/billing/plans"
 	"github.com/EduardoMark/BillingCore/internal/billing/subscription"
+	"github.com/EduardoMark/BillingCore/internal/cache"
 	"github.com/EduardoMark/BillingCore/internal/infra/database"
 	"github.com/EduardoMark/BillingCore/internal/infra/rabbitmq"
+	"github.com/EduardoMark/BillingCore/internal/infra/rediscache"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
@@ -57,6 +59,10 @@ func BindingRoutes(router *gin.Engine, db *gorm.DB) {
 	api := router.Group("/api/v1")
 	accGroup := api.Group("/accounts")
 
+	// redis client
+	redisClient := rediscache.NewRedisCache()
+	redisCacheClient := cache.NewRedisCache(redisClient)
+
 	// producer
 	producer := rabbitmq.NewProducer()
 
@@ -82,7 +88,7 @@ func BindingRoutes(router *gin.Engine, db *gorm.DB) {
 	subRepo := subscription.NewRepository(db)
 	subService := subscription.NewService(subRepo, producer)
 	subConsumer := subscription.NewConsumer(subService)
-	subHandler := subscription.NewHandler(subService)
+	subHandler := subscription.NewHandler(subService, redisCacheClient)
 	subHandler.RegisterRoutes(accGroup)
 
 	go func() {
